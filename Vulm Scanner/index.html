@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scanner de Vulnerabilidades</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Scanner de Vulnerabilidades</h1>
+        <div class="form-group">
+            <label for="alvo">URL ou IP do Alvo:</label>
+            <input type="text" id="alvo" placeholder="Digite a URL ou IP para escanear">
+        </div>
+        <div class="form-group">
+            <button onclick="iniciarScan()">Iniciar Scan</button>
+        </div>
+        <div id="resultado" aria-live="polite">
+            <h3>Resultados do Scan:</h3>
+            <div id="resultadoScan"></div>
+        </div>
+    </div>
+
+    <script src="VulmS.js"></script>
+    <script>
+        async function iniciarScan() {
+            const alvo = document.getElementById('alvo').value;
+            const resultadoDiv = document.getElementById('resultadoScan');
+            
+            if (!alvo) {
+                alert('Por favor, insira um alvo válido');
+                return;
+            }
+
+            resultadoDiv.innerHTML = 'Escaneando... Por favor, aguarde.';
+            
+            try {
+                const scanner = new VulnerabilityScanner(alvo);
+                const resultados = await scanner.scanAll();
+                
+                let htmlResultado = '<h4>Resultados do Scan:</h4>';
+                htmlResultado += `<p>URL analisada: ${resultados.targetUrl}</p>`;
+                htmlResultado += `<p>Vulnerabilidades encontradas: ${resultados.vulnerabilitiesFound}</p>`;
+                
+                if (resultados.vulnerabilities.length > 0) {
+                    htmlResultado += '<ul>';
+                    resultados.vulnerabilities.forEach(vuln => {
+                        htmlResultado += `<li>${vuln}</li>`;
+                    });
+                    htmlResultado += '</ul>';
+                } else {
+                    htmlResultado += '<p>Nenhuma vulnerabilidade encontrada!</p>';
+                }
+                
+                resultadoDiv.innerHTML = htmlResultado;
+            } catch (error) {
+                resultadoDiv.innerHTML = 'Erro ao realizar o scan: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>
